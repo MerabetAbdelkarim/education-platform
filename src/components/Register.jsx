@@ -1,58 +1,157 @@
-import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { supabase } from '../supabase/client'
-import { Input, Button, VStack, Text } from '@chakra-ui/react'
+import React, { useState, useContext } from 'react';
+import {
+    Box,
+    Button,
+    FormControl,
+    FormLabel,
+    Input,
+    VStack,
+    Heading,
+    useToast,
+    Text,
+} from '@chakra-ui/react';
+import { supabase } from '../supabase';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate, useParams } from 'react-router-dom';
 
-export default function Register() {
-    const [searchParams] = useSearchParams()
-    const roleFromURL = searchParams.get('role') || 'student'
+const Register = () => {
+    const { role } = useParams(); // Get role from URL (teacher or student)
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [studentId, setStudentId] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { setUser, setRole: setAuthRole } = useContext(AuthContext);
+    const toast = useToast();
+    const navigate = useNavigate();
 
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [fullName, setFullName] = useState('')
-    const [error, setError] = useState('')
-    const [success, setSuccess] = useState('')
-    const [role, setRole] = useState(roleFromURL)
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            // Sign up with Supabase Auth
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email,
+                password,
+            });
+            if (authError) throw authError;
 
-    useEffect(() => {
-        setRole(roleFromURL)
-    }, [roleFromURL])
-
-    const handleRegister = async () => {
-        setError('')
-        setSuccess('')
-
-        const { data, error } = await supabase.auth.signUp({ email, password })
-
-        if (error) {
-            setError(error.message)
-            return
-        }
-
-        const user = data.user
-        if (user) {
-            const { error: insertError } = await supabase.from('users').insert({
-                id: user.id,
-                full_name: fullName,
-                role: role,
-            })
-
-            if (insertError) {
-                setError('Insert error: ' + insertError.message)
+            // Insert into teachers or students table
+            if (role === 'teacher') {
+                const { error: teacherError } = await supabase
+                    .from('education_app.teachers')
+                    .insert({
+                        user_id: authData.user.id,
+                        email,
+                        first_name: firstName,
+                        last_name: lastName,
+                    });
+                if (teacherError) throw teacherError;
             } else {
-                setSuccess('Account created successfully. Check your email.')
+                if (!studentId) throw new Error('Student ID is required');
+                const { error: studentError } = await supabase
+                    .from('education_app.students')
+                    .insert({
+                        user_id: authData.user.id,
+                        student_id: studentId,
+                        email,
+                        first_name: firstName,
+                        last_name: lastName,
+                    });
+                if (studentError) throw studentError;
             }
+
+            setUser(authData.user);
+            setAuthRole(role);
+            toast({
+                title: 'Registration successful',
+                status: 'success',
+                duration: 3000,
+                isClosable: true,
+            });
+            navigate(role === 'teacher' ? '/dashboard/teacher' : '/dashboard/student');
+        } catch (error) {
+            console.log("Error during registration:", error);
+            toast({
+                title: 'Error',
+                description: error.message,
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+        } finally {
+            setLoading(false);
         }
-    }
+    };
 
     return (
-        <VStack spacing={4} p={6}>
-            <Input placeholder="Full Name" value={fullName} onChange={e => setFullName(e.target.value)} />
-            <Input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-            <Input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-            <Button onClick={handleRegister} colorScheme="blue">Register as {role}</Button>
-            {error && <Text color="red.500">{error}</Text>}
-            {success && <Text color="green.500">{success}</Text>}
-        </VStack>
-    )
-}
+        <Box maxW="md" mx="auto" mt={8} p={6} borderWidth={1} borderRadius="lg">
+            <Heading mb={6}>{role === 'teacher' ? 'Teacher' : 'Student'} Registration</Heading>
+            <form onSubmit={handleRegister}>
+                <VStack spacing={4}>
+                    <FormControl isRequired>
+                        <FormLabel>Email</FormLabel>
+                        <Input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </FormControl>
+                    <FormControl isRequired>
+                        <FormLabel>Password</FormLabel>
+                        <Input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </FormControl>
+                    <FormControl isRequired>
+                        <FormLabel>First Name</FormLabel>
+                        <Input
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                        />
+                    </FormControl>
+                    <FormControl isRequired>
+                        <FormLabel>Last Name</FormLabel>
+                        <Input
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                        />
+                    </FormControl>
+                    {role === 'student' && (
+                        <FormControl isRequired>
+                            <FormLabel>Student ID</FormLabel>
+                            <Input
+                                value={studentId}
+                                onChange={(e) => setStudentId(e.target.value)}
+                                placeholder="e.g., STU001"
+                            />
+                        </FormControl>
+                    )}
+                    <Button
+                        colorScheme="teal"
+                        type="submit"
+                        isLoading={loading}
+                        width="full"
+                    >
+                        Register
+                    </Button>
+                </VStack>
+            </form>
+            <Text mt={4}>
+                Already have an account?{' '}
+                <Button
+                    variant="link"
+                    colorScheme="teal"
+                    onClick={() => navigate('/login')}
+                >
+                    Login
+                </Button>
+            </Text>
+        </Box>
+    );
+};
+
+export default Register;
