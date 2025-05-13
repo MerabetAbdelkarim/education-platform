@@ -1,29 +1,242 @@
-import React, { useContext, useEffect } from 'react';
-import { Box, Heading, Text, VStack } from '@chakra-ui/react';
-import { AuthContext } from '../context/AuthContext';
+import React, { useState, useEffect, useContext } from 'react';
+import {
+    Box,
+    Flex,
+    Heading,
+    Text,
+    Button,
+    Table,
+    Thead,
+    Tbody,
+    Tr,
+    Th,
+    Td,
+    useToast,
+    Spinner,
+    VStack,
+} from '@chakra-ui/react';
+import { supabase } from '../supabase';
+
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 const StudentDashboard = () => {
-    const { user, role, loading } = useContext(AuthContext);
+    const { user, role, loading: authLoading, signOut } = useContext(AuthContext);
+    const [student, setStudent] = useState(null);
+    const [classes, setClasses] = useState([]);
+    const [selectedClass, setSelectedClass] = useState(null);
+    const [lessons, setLessons] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const toast = useToast();
     const navigate = useNavigate();
 
+    // Fetch student data
     useEffect(() => {
-        if (!loading && (!user || role !== 'student')) {
-            navigate('/login');
-        }
-    }, [user, role, loading, navigate]);
+        if (authLoading) return;
 
-    if (loading) return <Text>Loading...</Text>;
+        if (!user || role !== 'student') {
+            navigate('/login');
+            return;
+        }
+
+        const fetchStudent = async () => {
+            setIsLoading(true);
+            const { data: studentData, error } = await supabase
+                .from('students')
+                .select('id, studentId, first_name, last_name')
+                .eq('user_id', user.id)
+                .single();
+
+            if (error) {
+                toast({
+                    title: 'Error',
+                    description: 'Failed to load student profile',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+            setStudent(studentData);
+            await fetchClasses(studentData.id);
+            setIsLoading(false);
+        };
+
+        fetchStudent();
+    }, [user, role, authLoading, navigate, toast]);
+
+    const fetchClasses = async (studentId) => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('class_enrollments')
+            .select(`
+        class_id,
+        classes(id, name, description, teacher_id, teachers(first_name, last_name))
+      `)
+            .eq('student_id', studentId)
+            .order('class_id');
+
+        if (error) {
+            toast({
+                title: 'Error',
+                description: 'Failed to load classes',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+        } else {
+            setClasses(
+                data.map((enrollment) => ({
+                    ...enrollment.classes,
+                    teacher_name: `${enrollment.classes.teachers.first_name} ${enrollment.classes.teachers.last_name}`,
+                }))
+            );
+        }
+        setIsLoading(false);
+    };
+
+    const fetchLessons = async (classId) => {
+        setIsLoading(true);
+        const { data: lessonData, error: lessonError } = await supabase
+            .from('lessons')
+            .select('id, name, pdf_path, created_at')
+            .eq('class_id', classId)
+            .order('created_at', { ascending: false });
+
+        if (lessonError) {
+            toast({
+                title: 'Error',
+                description: 'Failed to load lessons',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+            setIsLoading(false);
+            return;
+        }
+
+        // Generate signed URLs for lesson PDFs
+        const lessonsWithUrls = await Promise.all(
+            lessonData.map(async (lesson) => {
+                const { data: signedUrlData, error: urlError } = await supabase.storage
+                    .from('lessons')
+                    .createSignedUrl(lesson.pdf_path, 3600); // 1-hour expiry
+                if (urlError) {
+                    console.error('Error generating signed URL:', urlError);
+                    return { ...lesson, pdf_url: null };
+                }
+                return { ...lesson, pdf_url: signedUrlData.signedUrl };
+            })
+        );
+
+        setLessons(lessonsWithUrls);
+        setIsLoading(false);
+    };
+
+    if (authLoading || isLoading || !student) {
+        return (
+            <Flex justify="center" align="center" minH="100vh">
+                <Spinner size="xl" />
+            </Flex>
+        );
+    }
 
     return (
-        <Box maxW="lg" mx="auto" mt={8} p={6}>
-            <VStack spacing={4}>
-                <Heading>Student Dashboard</Heading>
-                <Text>Welcome, {user?.email}!</Text>
-                <Text>Your Student ID: {role === 'student' && (
-                    <span>Loading...</span> // Fetch student_id from students table
-                )}</Text>
-                <Text>Here you can view your enrolled classes and lessons.</Text>
+        <Box p={8}>
+            <VStack spacing={8} align="stretch">
+                {/* Student Profile */}
+                <Box>
+                    <Flex justify="space-between" align="center">
+                        <Heading size="lg">Student Dashboard</Heading>
+                        <Button colorScheme="red" onClick={signOut}>
+                            Sign Out
+                        </Button>
+                    </Flex>
+                    <Text mt={2}>
+                        Welcome, {student.first_name} {student.last_name} ({user.email})
+                    </Text>
+                    <Text mt={1}>Student ID: {student.studentId}</Text>
+                </Box>
+
+                {/* Enrolled Classes */}
+                <Box>
+                    <Heading size="md" mb={4}>
+                        Your Classes
+                    </Heading>
+                    {classes.length === 0 ? (
+                        <Text>You are not enrolled in any classes.</Text>
+                    ) : (
+                        <Table variant="simple">
+                            <Thead>
+                                <Tr>
+                                    <Th>Name</Th>
+                                    <Th>Description</Th>
+                                    <Th>Teacher</Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {classes.map((cls) => (
+                                    <Tr key={cls.id}>
+                                        <Td>
+                                            <Button
+                                                variant="link"
+                                                onClick={() => {
+                                                    setSelectedClass(cls);
+                                                    fetchLessons(cls.id);
+                                                }}
+                                            >
+                                                {cls.name}
+                                            </Button>
+                                        </Td>
+                                        <Td>{cls.description}</Td>
+                                        <Td>{cls.teacher_name}</Td>
+                                    </Tr>
+                                ))}
+                            </Tbody>
+                        </Table>
+                    )}
+                </Box>
+
+                {/* Lessons for Selected Class */}
+                {selectedClass && (
+                    <Box>
+                        <Heading size="md" mb={4}>
+                            Lessons for {selectedClass.name}
+                        </Heading>
+                        {lessons.length === 0 ? (
+                            <Text>No lessons available for this class.</Text>
+                        ) : (
+                            <Table variant="simple">
+                                <Thead>
+                                    <Tr>
+                                        <Th>Name</Th>
+                                        <Th>PDF</Th>
+                                    </Tr>
+                                </Thead>
+                                <Tbody>
+                                    {lessons.map((lesson) => (
+                                        <Tr key={lesson.id}>
+                                            <Td>{lesson.name}</Td>
+                                            <Td>
+                                                {lesson.pdf_url ? (
+                                                    <a
+                                                        href={lesson.pdf_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        View PDF
+                                                    </a>
+                                                ) : (
+                                                    <Text color="red.500">PDF unavailable</Text>
+                                                )}
+                                            </Td>
+                                        </Tr>
+                                    ))}
+                                </Tbody>
+                            </Table>
+                        )}
+                    </Box>
+                )}
             </VStack>
         </Box>
     );
