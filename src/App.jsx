@@ -9,6 +9,7 @@ import Register from './components/Register';
 import Login from './components/Login';
 import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
+import EmailConfirmation from './components/EmailConfirmation';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/role-selection" element={<RoleSelection />} />
             <Route path="/register/:role" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/email-confirmation" element={<EmailConfirmation />} />
             <Route path="/dashboard/student" element={<StudentDashboard />} />
             <Route path="/dashboard/teacher" element={<TeacherDashboard />} />
           </Routes>

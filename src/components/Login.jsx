@@ -30,10 +30,12 @@ const Login = () => {
                 email,
                 password,
             });
+            console.log("data", data)
+            console.log("error", error)
             if (error) throw error;
             setUser(data.user);
             const { data: teacher } = await supabase
-                .from('education_app.teachers')
+                .from('teachers')
                 .select('teacher_id')
                 .eq('user_id', data.user.id)
                 .single();
@@ -42,7 +44,7 @@ const Login = () => {
                 navigate('/dashboard/teacher');
             } else {
                 const { data: student } = await supabase
-                    .from('education_app.students')
+                    .from('students')
                     .select('student_pk')
                     .eq('user_id', data.user.id)
                     .single();

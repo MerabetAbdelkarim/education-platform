@@ -40,7 +40,7 @@ const Register = () => {
             // Insert into teachers or students table
             if (role === 'teacher') {
                 const { error: teacherError } = await supabase
-                    .from('education_app.teachers')
+                    .from('teachers')
                     .insert({
                         user_id: authData.user.id,
                         email,
@@ -51,10 +51,10 @@ const Register = () => {
             } else {
                 if (!studentId) throw new Error('Student ID is required');
                 const { error: studentError } = await supabase
-                    .from('education_app.students')
+                    .from('students')
                     .insert({
                         user_id: authData.user.id,
-                        student_id: studentId,
+                        studentId,
                         email,
                         first_name: firstName,
                         last_name: lastName,
@@ -65,14 +65,13 @@ const Register = () => {
             setUser(authData.user);
             setAuthRole(role);
             toast({
-                title: 'Registration successful',
+                title: 'Registration successful ',
                 status: 'success',
                 duration: 3000,
                 isClosable: true,
             });
-            navigate(role === 'teacher' ? '/dashboard/teacher' : '/dashboard/student');
+            navigate('/email-confirmation');
         } catch (error) {
-            console.log("Error during registration:", error);
             toast({
                 title: 'Error',
                 description: error.message,
