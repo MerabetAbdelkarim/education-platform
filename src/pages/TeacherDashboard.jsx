@@ -114,7 +114,7 @@ const TeacherDashboard = () => {
             .from('class_enrollments')
             .select(`
         student_id,
-        students(student_education_id, first_name, last_name),
+        students(studentId, first_name, last_name),
         auth.users(email)
       `)
             .eq('class_id', classId);
@@ -233,7 +233,7 @@ const TeacherDashboard = () => {
         const { data: student, error: studentError } = await supabase
             .from('students')
             .select('id')
-            .eq('student_education_id', newStudentId)
+            .eq('studentId', newStudentId)
             .single();
 
         if (studentError || !student) {
@@ -490,8 +490,8 @@ const TeacherDashboard = () => {
                                             </Thead>
                                             <Tbody>
                                                 {students.map((student) => (
-                                                    <Tr key={student.student_education_id}>
-                                                        <Td>{student.student_education_id}</Td>
+                                                    <Tr key={student.studentId}>
+                                                        <Td>{student.studentId}</Td>
                                                         <Td>{student.first_name}</Td>
                                                         <Td>{student.last_name}</Td>
                                                         <Td>{student.email}</Td>
