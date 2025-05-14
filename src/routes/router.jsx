@@ -1,19 +1,57 @@
-import { Route, Routes } from "react-router-dom";
-import Landing from "../pages/Landing";
-import RoleSelection from "../components/RoleSelection";
-import Register from "../components/Register";
-import Login from "../components/Login";
-import EmailConfirmation from "../components/EmailConfirmation";
-import StudentDashboard from "../pages/StudentDashboard";
-import TeacherDashboard from "../pages/TeacherDashboard";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Landing from './pages/Landing';
+import RoleSelection from './components/RoleSelection';
+import Register from './components/Register';
+import Login from './components/Login';
+import EmailConfirmation from '../components/EmailConfirmation';
+import StudentDashboard from './pages/StudentDashboard';
+import TeacherDashboard from './pages/TeacherDashboard';
+import GuestOnlyRoute from './GuestOnlyRoute';
+import ProtectedRoute from './ProtectedRoute';
+
 const AppRoutes = () => {
     return (
         <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/role-selection" element={<RoleSelection />} />
-            <Route path="/register/:role" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/email-confirmation" element={<EmailConfirmation />} />
+            <Route
+                path="/"
+                element={
+                    <GuestOnlyRoute>
+                        <Landing />
+                    </GuestOnlyRoute>
+                } />
+            <Route
+                path="/role-selection"
+                element={
+                    <GuestOnlyRoute>
+                        <RoleSelection />
+                    </GuestOnlyRoute>
+                }
+            />
+            <Route
+                path="/register/:role"
+                element={
+                    <GuestOnlyRoute>
+                        <Register />
+                    </GuestOnlyRoute>
+                }
+            />
+            <Route
+                path="/login"
+                element={
+                    <GuestOnlyRoute>
+                        <Login />
+                    </GuestOnlyRoute>
+                }
+            />
+            <Route
+                path="/email-confirmation"
+                element={
+                    <ProtectedRoute>
+                        <EmailConfirmation />
+                    </ProtectedRoute>
+                }
+            />
             <Route
                 path="/dashboard/student"
                 element={
