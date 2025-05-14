@@ -30,8 +30,6 @@ const Login = () => {
                 email,
                 password,
             });
-            console.log("data", data)
-            console.log("error", error)
             if (error) throw error;
             setUser(data.user);
             const { data: teacher } = await supabase

@@ -9,7 +9,6 @@ const roleToDashboard = {
 
 const GuestOnlyRoute = ({ children }) => {
     const { user, role } = useContext(AuthContext);
-
     if (user && user?.user_metadata?.email_verified) {
         const redirectPath = roleToDashboard[role] || '/';
         return <Navigate to={redirectPath} replace />;

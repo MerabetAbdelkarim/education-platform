@@ -1,14 +1,14 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Landing from './pages/Landing';
-import RoleSelection from './components/RoleSelection';
-import Register from './components/Register';
-import Login from './components/Login';
+import Landing from '../pages/Landing';
+import RoleSelection from '../components/RoleSelection';
+import Register from '../components/Register';
+import Login from '../components/Login';
 import EmailConfirmation from '../components/EmailConfirmation';
-import StudentDashboard from './pages/StudentDashboard';
-import TeacherDashboard from './pages/TeacherDashboard';
+import StudentDashboard from '../pages/StudentDashboard';
+import TeacherDashboard from '../pages/TeacherDashboard';
 import GuestOnlyRoute from './GuestOnlyRoute';
 import ProtectedRoute from './ProtectedRoute';
+import NotFoundPage from '../pages/404';
 
 const AppRoutes = () => {
     return (
@@ -19,7 +19,8 @@ const AppRoutes = () => {
                     <GuestOnlyRoute>
                         <Landing />
                     </GuestOnlyRoute>
-                } />
+                }
+            />
             <Route
                 path="/role-selection"
                 element={
@@ -47,9 +48,9 @@ const AppRoutes = () => {
             <Route
                 path="/email-confirmation"
                 element={
-                    <ProtectedRoute>
+                    <GuestOnlyRoute>
                         <EmailConfirmation />
-                    </ProtectedRoute>
+                    </GuestOnlyRoute>
                 }
             />
             <Route
@@ -66,6 +67,12 @@ const AppRoutes = () => {
                     <ProtectedRoute allowedRole="teacher">
                         <TeacherDashboard />
                     </ProtectedRoute>
+                }
+            />
+            <Route
+                path="*"
+                element={
+                    <NotFoundPage />
                 }
             />
         </Routes>

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import { useState } from 'react';
 import {
     Box,
     Button,
@@ -15,29 +15,24 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const Register = () => {
-    const { role } = useParams(); // Get role from URL (teacher or student)
+    const { role } = useParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [studentId, setStudentId] = useState('');
     const [loading, setLoading] = useState(false);
-    const { setUser, setRole: setAuthRole } = useContext(AuthContext);
     const toast = useToast();
     const navigate = useNavigate();
-
     const handleRegister = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            // Sign up with Supabase Auth
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email,
                 password,
             });
             if (authError) throw authError;
-
-            // Insert into teachers or students table
             if (role === 'teacher') {
                 const { error: teacherError } = await supabase
                     .from('teachers')
@@ -59,11 +54,9 @@ const Register = () => {
                         first_name: firstName,
                         last_name: lastName,
                     });
+                console.log("studentError", studentError);
                 if (studentError) throw studentError;
             }
-
-            setUser(authData.user);
-            setAuthRole(role);
             toast({
                 title: 'Registration successful ',
                 status: 'success',
