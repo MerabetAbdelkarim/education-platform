@@ -248,6 +248,9 @@ const TeacherDashboard = () => {
             return;
         }
 
+        console.log("Student ID:", student.id);
+        console.log("Selected Class ID:", selectedClass.id);
+
         const { error } = await supabase
             .from('class_enrollments')
             .insert({

@@ -6,6 +6,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 const EmailConfirmation = () => {
     const { user } = useContext(AuthContext);
+    console.log("user", user)
     const navigate = useNavigate();
     return (
         <Center minH="calc(100vh - 72px)" bg="gray.100">
@@ -38,7 +39,7 @@ const EmailConfirmation = () => {
                             as="button"
                             color="blue.500"
                             fontWeight="bold"
-                            onClick={()=>navigate('/login')}
+                            onClick={() => navigate('/login')}
                         >
                             Login
                         </Link>
