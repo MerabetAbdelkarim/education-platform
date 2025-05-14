@@ -21,7 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const StudentDashboard = () => {
-    const { user, role, loading: authLoading, signOut } = useContext(AuthContext);
+    const { user, role, loading: authLoading } = useContext(AuthContext);
     const [student, setStudent] = useState(null);
     const [classes, setClasses] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
@@ -148,9 +148,6 @@ const StudentDashboard = () => {
                 <Box>
                     <Flex justify="space-between" align="center">
                         <Heading size="lg">Student Dashboard</Heading>
-                        <Button colorScheme="red" onClick={signOut}>
-                            Sign Out
-                        </Button>
                     </Flex>
                     <Text mt={2}>
                         Welcome, {student.first_name} {student.last_name} ({user.email})
