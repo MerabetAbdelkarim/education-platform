@@ -48,7 +48,7 @@ const Navbar = () => {
                         <Box color="white" mr={4}>
                             {role === 'teacher' ? 'Teacher' : 'Student'}: {user.email}
                         </Box>
-                        <Button colorScheme="teal" variant="outline" onClick={handleSignOut}>
+                        <Button colorScheme="red"  onClick={handleSignOut}>
                             Sign Out
                         </Button>
                     </>
