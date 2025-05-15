@@ -27,7 +27,7 @@ import {
     HStack,
     IconButton,
 } from '@chakra-ui/react';
-import { MdDeleteOutline  }  from "react-icons/md";;
+import { MdDeleteOutline } from "react-icons/md";;
 import { supabase } from '../supabase';
 
 import { useNavigate } from 'react-router-dom';
@@ -112,17 +112,13 @@ const TeacherDashboard = () => {
         // Fetch students
         const { data: studentData, error: studentError } = await supabase
             .from('class_enrollments')
-            .select(`
-        student_id,
-        students(studentId, first_name, last_name),
-        auth.users(email)
-      `)
+            .select(`student_id,students(studentId, first_name, last_name),auth.users(email)`)
             .eq('class_id', classId);
 
         // Fetch lessons and generate signed URLs
         const { data: lessonData, error: lessonError } = await supabase
             .from('lessons')
-            .select('id, name, pdf_path, created_at')
+            .select('id, name, pdf_url, created_at')
             .eq('class_id', classId)
             .order('created_at', { ascending: false });
 
@@ -143,7 +139,7 @@ const TeacherDashboard = () => {
             lessonData.map(async (lesson) => {
                 const { data: signedUrlData, error: urlError } = await supabase.storage
                     .from('lessons')
-                    .createSignedUrl(lesson.pdf_path, 3600); // 1-hour expiry
+                    .createSignedUrl(lesson.pdf_url, 3600); // 1-hour expiry
                 if (urlError) {
                     console.error('Error generating signed URL:', urlError);
                     return { ...lesson, pdf_url: null };
@@ -247,10 +243,6 @@ const TeacherDashboard = () => {
             setIsLoading(false);
             return;
         }
-
-        console.log("Student ID:", student.id);
-        console.log("Selected Class ID:", selectedClass.id);
-
         const { error } = await supabase
             .from('class_enrollments')
             .insert({
@@ -282,6 +274,7 @@ const TeacherDashboard = () => {
     };
 
     const handleAddLesson = async () => {
+        console.log("Adding lesson:", newLesson);
         setIsLoading(true);
         if (!newLesson.pdf_file) {
             toast({
@@ -300,7 +293,6 @@ const TeacherDashboard = () => {
         const { error: uploadError } = await supabase.storage
             .from('lessons')
             .upload(fileName, newLesson.pdf_file);
-
         if (uploadError) {
             toast({
                 title: 'Error',
@@ -313,18 +305,25 @@ const TeacherDashboard = () => {
             return;
         }
 
+        const dataO = {
+            class_id: selectedClass.id,
+            name: newLesson.name,
+            pdf_url: fileName,
+        }
+        console.log("Data to insert:", dataO);
         const { error } = await supabase
             .from('lessons')
             .insert({
                 class_id: selectedClass.id,
                 name: newLesson.name,
-                pdf_path: fileName,
+                pdf_url: fileName,
             });
 
         if (error) {
+            console.log("error", error)
             toast({
                 title: 'Error',
-                description: 'Failed to add lesson',
+                description: error,
                 status: 'error',
                 duration: 3000,
                 isClosable: true,
@@ -442,7 +441,7 @@ const TeacherDashboard = () => {
                                         <Td>{cls.description}</Td>
                                         <Td>
                                             <IconButton
-                                                icon={<MdDeleteOutline  />}
+                                                icon={<MdDeleteOutline />}
                                                 colorScheme="red"
                                                 size="sm"
                                                 onClick={() => handleDeleteClass(cls.id)}
@@ -544,10 +543,10 @@ const TeacherDashboard = () => {
                                                         </Td>
                                                         <Td>
                                                             <IconButton
-                                                                icon={<MdDeleteOutline  />}
+                                                                icon={<MdDeleteOutline />}
                                                                 colorScheme="red"
                                                                 size="sm"
-                                                                onClick={() => handleDeleteLesson(lesson.id, lesson.pdf_path)}
+                                                                onClick={() => handleDeleteLesson(lesson.id, lesson.pdf_url)}
                                                                 isDisabled={isLoading}
                                                             />
                                                         </Td>

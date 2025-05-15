@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 
 import AppRoutes from './routes/router';
+import PdfUpload from './pages/PdfUpload';
 
 function App() {
   return (
