@@ -29,7 +29,6 @@ import {
 } from '@chakra-ui/react';
 import { MdDeleteOutline } from "react-icons/md";;
 import { supabase } from '../supabase';
-
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
@@ -112,16 +111,14 @@ const TeacherDashboard = () => {
         // Fetch students
         const { data: studentData, error: studentError } = await supabase
             .from('class_enrollments')
-            .select(`student_id,students(studentId, first_name, last_name),auth.users(email)`)
+            .select(`student_id,students(studentId, first_name, last_name, email)`)
             .eq('class_id', classId);
-
         // Fetch lessons and generate signed URLs
         const { data: lessonData, error: lessonError } = await supabase
             .from('lessons')
             .select('id, name, pdf_url, created_at')
             .eq('class_id', classId)
             .order('created_at', { ascending: false });
-
         if (studentError || lessonError) {
             toast({
                 title: 'Error',
@@ -148,12 +145,8 @@ const TeacherDashboard = () => {
             })
         );
 
-        setStudents(
-            studentData.map((enrollment) => ({
-                ...enrollment.students,
-                email: enrollment.auth_users?.email,
-            }))
-        );
+        setStudents(studentData);
+
         setLessons(lessonsWithUrls);
         setIsLoading(false);
     };
@@ -489,11 +482,11 @@ const TeacherDashboard = () => {
                                             </Thead>
                                             <Tbody>
                                                 {students.map((student) => (
-                                                    <Tr key={student.studentId}>
-                                                        <Td>{student.studentId}</Td>
-                                                        <Td>{student.first_name}</Td>
-                                                        <Td>{student.last_name}</Td>
-                                                        <Td>{student.email}</Td>
+                                                    <Tr key={student?.students?.studentId}>
+                                                        <Td>{student?.students?.studentId}</Td>
+                                                        <Td>{student?.students?.first_name}</Td>
+                                                        <Td>{student?.students?.last_name}</Td>
+                                                        <Td>{student?.students?.email}</Td>
                                                     </Tr>
                                                 ))}
                                             </Tbody>
