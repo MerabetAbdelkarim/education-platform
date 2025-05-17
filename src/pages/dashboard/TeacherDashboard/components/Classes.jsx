@@ -11,22 +11,27 @@ import {
     Tr,
     Th,
     Td,
-    useToast,
     VStack,
     IconButton,
     useColorModeValue,
     TableContainer,
     useDisclosure,
 } from '@chakra-ui/react';
-import { MdAdd, MdDeleteOutline } from "react-icons/md";;
-import { supabase } from '../../../../supabase';
+import { MdAdd, MdDeleteOutline } from "react-icons/md";
 import CreateClassModal from '../model/createClassModal';
+import DeleteClassModal from '../model/DeleteClassModal';
 
-const ClassesComponent = ({ classes, teacher, fetchClasses, setClasses }) => {
+const ClassesComponent = ({ classes, teacher, setClasses }) => {
     const [selectedClass, setSelectedClass] = useState(null);
-    const { isOpen, onOpen, onClose } = useDisclosure()
+    const { isOpen: isOpenCreate, onOpen: onOpenCreate, onClose: onCloseCreate } = useDisclosure()
+    const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
     const [isLoading, setIsLoading] = useState(false);
-    const toast = useToast();
+    const [selectedClassId, setSelectedClassId] = useState(null);
+
+    const handleOpenDelete = (classId) => {
+        setSelectedClassId(classId);
+        onOpenDelete();
+    };
 
     const bgColor = useColorModeValue("gray.50", "gray.800");
     const borderColor = useColorModeValue("gray.200", "gray.700");
@@ -34,39 +39,6 @@ const ClassesComponent = ({ classes, teacher, fetchClasses, setClasses }) => {
     const headingColor = useColorModeValue("gray.800", "white");
     const hoverBgColor = useColorModeValue("gray.50", "gray.700");
     const descriptionColor = useColorModeValue("gray.600", "gray.300");
-
-    const handleDeleteClass = async (classId) => {
-        setIsLoading(true);
-        const { error } = await supabase
-            .from('classes')
-            .delete()
-            .eq('id', classId);
-
-        if (error) {
-            toast({
-                title: 'Error',
-                description: 'Failed to delete class',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-        } else {
-            toast({
-                title: 'Success',
-                description: 'Class deleted successfully',
-                status: 'success',
-                duration: 3000,
-                isClosable: true,
-            });
-            await fetchClasses(teacher.id);
-            if (selectedClass?.id === classId) {
-                setSelectedClass(null);
-                setStudents([]);
-                setLessons([]);
-            }
-        }
-        setIsLoading(false);
-    };
 
     return (
         <Box p={8}>
@@ -78,7 +50,7 @@ const ClassesComponent = ({ classes, teacher, fetchClasses, setClasses }) => {
                         </Heading>
                         <Button
                             colorScheme="blue"
-                            onClick={onOpen}
+                            onClick={onOpenCreate}
                             leftIcon={<MdAdd />}
                             size="sm"
                         >
@@ -99,7 +71,7 @@ const ClassesComponent = ({ classes, teacher, fetchClasses, setClasses }) => {
                             <Button
                                 colorScheme="blue"
                                 variant="outline"
-                                onClick={onOpen}
+                                onClick={onOpenCreate}
                                 size="sm"
                             >
                                 Create Your First Class
@@ -145,7 +117,7 @@ const ClassesComponent = ({ classes, teacher, fetchClasses, setClasses }) => {
                                                     colorScheme="red"
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => handleDeleteClass(cls.id)}
+                                                    onClick={() => handleOpenDelete(cls.id)}
                                                     isDisabled={isLoading}
                                                 />
                                             </Td>
@@ -157,7 +129,8 @@ const ClassesComponent = ({ classes, teacher, fetchClasses, setClasses }) => {
                     )}
                 </Box>
             </VStack >
-            <CreateClassModal isOpen={isOpen} onClose={onClose} teacher={teacher} fetchClasses={fetchClasses} setClasses={setClasses} />
+            <CreateClassModal isOpen={isOpenCreate} onClose={onCloseCreate} teacher={teacher} setClasses={setClasses} />
+            <DeleteClassModal isOpen={isOpenDelete} onClose={onCloseDelete} teacher={teacher} classId={selectedClassId} setClasses={setClasses} />
         </Box >
     );
 };

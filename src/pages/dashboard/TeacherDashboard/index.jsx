@@ -119,7 +119,7 @@ const TeacherDashboard = () => {
                         Welcome, {teacher.first_name} {teacher.last_name} ({user.email})
                     </Text>
                 </Box>
-                <ClassesComponent classes={classes} teacher={teacher} fetchClasses={fetchClasses} setClasses={setClasses} />
+                <ClassesComponent classes={classes} teacher={teacher} setClasses={setClasses} />
             </VStack >
         </Box >
     );
