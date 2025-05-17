@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import Landing from '../pages/Home/index';
 import RoleSelection from '../pages/auth/RoleSelection';
 import Register from '../pages/auth/Register';
@@ -9,6 +10,7 @@ import TeacherDashboard from '../pages/TeacherDashboard';
 import GuestOnlyRoute from './GuestOnlyRoute';
 import ProtectedRoute from './ProtectedRoute';
 import NotFoundPage from '../pages/404';
+import Layout from '../Layout';
 
 const AppRoutes = () => {
     return (
@@ -17,7 +19,9 @@ const AppRoutes = () => {
                 path="/"
                 element={
                     <GuestOnlyRoute>
-                        <Landing />
+                        <Layout>
+                            <Landing />
+                        </Layout>
                     </GuestOnlyRoute>
                 }
             />
@@ -25,7 +29,9 @@ const AppRoutes = () => {
                 path="/role-selection"
                 element={
                     <GuestOnlyRoute>
-                        <RoleSelection />
+                        <Layout>
+                            <RoleSelection />
+                        </Layout>
                     </GuestOnlyRoute>
                 }
             />
@@ -33,7 +39,9 @@ const AppRoutes = () => {
                 path="/register/:role"
                 element={
                     <GuestOnlyRoute>
-                        <Register />
+                        <Layout>
+                            <Register />
+                        </Layout>
                     </GuestOnlyRoute>
                 }
             />
@@ -41,7 +49,9 @@ const AppRoutes = () => {
                 path="/login"
                 element={
                     <GuestOnlyRoute>
-                        <Login />
+                        <Layout>
+                            <Login />
+                        </Layout>
                     </GuestOnlyRoute>
                 }
             />
@@ -49,7 +59,9 @@ const AppRoutes = () => {
                 path="/email-confirmation"
                 element={
                     <GuestOnlyRoute>
-                        <EmailConfirmation />
+                        <Layout>
+                            <EmailConfirmation />
+                        </Layout>
                     </GuestOnlyRoute>
                 }
             />
@@ -57,7 +69,9 @@ const AppRoutes = () => {
                 path="/dashboard/student"
                 element={
                     <ProtectedRoute allowedRole="student">
-                        <StudentDashboard />
+                        <Layout>
+                            <StudentDashboard />
+                        </Layout>
                     </ProtectedRoute>
                 }
             />
@@ -65,7 +79,9 @@ const AppRoutes = () => {
                 path="/dashboard/teacher"
                 element={
                     <ProtectedRoute allowedRole="teacher">
-                        <TeacherDashboard />
+                        <Layout>
+                            <TeacherDashboard />
+                        </Layout>
                     </ProtectedRoute>
                 }
             />

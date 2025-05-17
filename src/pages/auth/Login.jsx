@@ -92,7 +92,7 @@ const Login = () => {
                         />
                     </FormControl>
                     <Button
-                        colorScheme="teal"
+                        colorScheme="purple"
                         type="submit"
                         isLoading={loading}
                         width="full"
@@ -105,7 +105,7 @@ const Login = () => {
                 Don't have an account?{' '}
                 <Button
                     variant="link"
-                    colorScheme="teal"
+                    colorScheme="purple"
                     onClick={() => navigate('/role-selection')}
                 >
                     Register
