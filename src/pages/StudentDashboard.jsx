@@ -99,7 +99,7 @@ const StudentDashboard = () => {
         setIsLoading(true);
         const { data: lessonData, error: lessonError } = await supabase
             .from('lessons')
-            .select('id, name, pdf_path, created_at')
+            .select('id, name, pdf_url, created_at')
             .eq('class_id', classId)
             .order('created_at', { ascending: false });
 
@@ -120,7 +120,7 @@ const StudentDashboard = () => {
             lessonData.map(async (lesson) => {
                 const { data: signedUrlData, error: urlError } = await supabase.storage
                     .from('lessons')
-                    .createSignedUrl(lesson.pdf_path, 3600); // 1-hour expiry
+                    .createSignedUrl(lesson.pdf_url, 3600); // 1-hour expiry
                 if (urlError) {
                     console.error('Error generating signed URL:', urlError);
                     return { ...lesson, pdf_url: null };

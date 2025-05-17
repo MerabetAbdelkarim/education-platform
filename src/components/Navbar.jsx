@@ -37,9 +37,9 @@ const Navbar = () => {
     };
 
     return (
-        <Box bg="teal.500" p={4}>
+        <Box bg="white" p={4}>
             <Flex alignItems="center">
-                <Heading size="md" color="white">
+                <Heading size="md" color='purple.800'>
                     <Link to="/">EduApp</Link>
                 </Heading>
                 <Spacer />
@@ -48,7 +48,7 @@ const Navbar = () => {
                         <Box color="white" mr={4}>
                             {role === 'teacher' ? 'Teacher' : 'Student'}: {user.email}
                         </Box>
-                        <Button colorScheme="red"  onClick={handleSignOut}>
+                        <Button colorScheme="red" onClick={handleSignOut}>
                             Sign Out
                         </Button>
                     </>
@@ -57,13 +57,13 @@ const Navbar = () => {
                         <Button
                             as={Link}
                             to="/login"
-                            colorScheme="teal"
+                            colorScheme='purple'
                             variant="outline"
                             mr={2}
                         >
                             Login
                         </Button>
-                        <Button as={Link} to="/role-selection" colorScheme="teal">
+                        <Button as={Link} to="/role-selection" colorScheme='purple' >
                             Register
                         </Button>
                     </>
