@@ -89,7 +89,7 @@ export function AdvancedTable({ columns, data }) {
                             </Tr>
                         ))}
                     </Thead>
-                    <Tbody {...getTableBodyProps()}>
+                    <Tbody  {...getTableBodyProps()}>
                         {page.map((row) => {
                             prepareRow(row);
                             return (
