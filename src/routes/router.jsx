@@ -1,12 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
 import Landing from '../pages/Home/index';
 import RoleSelection from '../pages/auth/RoleSelection';
 import Register from '../pages/auth/Register';
 import Login from '../pages/auth/Login';
 import EmailConfirmation from '../pages/auth/EmailConfirmation';
-import StudentDashboard from '../pages/StudentDashboard';
-import TeacherDashboard from '../pages/TeacherDashboard';
+import StudentDashboard from '../pages/dashboard/StudentDashboard';
+import TeacherDashboard from '../pages/dashboard/TeacherDashboard';
 import GuestOnlyRoute from './GuestOnlyRoute';
 import ProtectedRoute from './ProtectedRoute';
 import NotFoundPage from '../pages/404';

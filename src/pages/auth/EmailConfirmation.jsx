@@ -1,4 +1,4 @@
-import { Box, Text, Button, Link, VStack, Divider, Center, Img, Flex } from "@chakra-ui/react";
+import { Box, Text, Button, Link, VStack, Divider, Img, Flex } from "@chakra-ui/react";
 import ImageConf from "../../assets/confirmation.png";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
