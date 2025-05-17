@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import AppRoutes from './routes/router';
+import Footer from './components/Footer';
 
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Router>
           <Navbar />
           <AppRoutes />
+          <Footer />
         </Router>
       </AuthProvider>
     </ChakraProvider>

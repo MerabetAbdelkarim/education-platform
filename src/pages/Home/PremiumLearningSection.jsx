@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Flex, Image, Heading, Text, VStack, HStack, Icon, SimpleGrid } from '@chakra-ui/react';
 import { FaHeart, FaGamepad } from 'react-icons/fa';
-import ImgPremium from '../assets/image-premium.svg';
-import ImgPremiumBg from '../assets/bg-cover-two.svg';
+import ImgPremium from '../../assets/image-premium.svg';
+import ImgPremiumBg from '../../assets/bg-cover-two.svg';
 
 const PremiumLearningSection = () => {
     return (<>

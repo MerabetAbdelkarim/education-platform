@@ -7,11 +7,11 @@ import {
     Flex,
     Image,
 } from '@chakra-ui/react';
-import ImgHero from '../assets/hero-image.svg';
-import ImgHeroBg from '../assets/bg-cover.svg'
+import ImgHero from '../../assets/hero-image.svg';
+import ImgHeroBg from '../../assets/bg-cover.svg'
 import { Link } from 'react-router-dom';
 
-const HomePage = () => {
+const HeroSection = () => {
     return (
         <Box bgImage={ImgHeroBg} bgSize="cover" bgPosition="center" bgRepeat="no-repeat">
             <Flex py={"100px"} justify="center" gap={5} align="center" flexWrap="wrap" >
@@ -35,4 +35,4 @@ const HomePage = () => {
     );
 };
 
-export default HomePage;
+export default HeroSection;
