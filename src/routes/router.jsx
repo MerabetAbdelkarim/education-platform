@@ -1,9 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import Landing from '../pages/Home/index';
-import RoleSelection from '../components/RoleSelection';
-import Register from '../components/Register';
-import Login from '../components/Login';
-import EmailConfirmation from '../components/EmailConfirmation';
+import RoleSelection from '../pages/auth/RoleSelection';
+import Register from '../pages/auth/Register';
+import Login from '../pages/auth/Login';
+import EmailConfirmation from '../pages/auth/EmailConfirmation';
 import StudentDashboard from '../pages/StudentDashboard';
 import TeacherDashboard from '../pages/TeacherDashboard';
 import GuestOnlyRoute from './GuestOnlyRoute';

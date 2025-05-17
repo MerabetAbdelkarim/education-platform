@@ -10,8 +10,7 @@ import {
     useToast,
     Text,
 } from '@chakra-ui/react';
-import { supabase } from '../supabase';
-import { AuthContext } from '../context/AuthContext';
+import { supabase } from '../../supabase';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const Register = () => {

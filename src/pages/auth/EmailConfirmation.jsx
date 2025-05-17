@@ -1,8 +1,8 @@
 import { Box, Text, Button, Link, VStack, Divider, Center, Img } from "@chakra-ui/react";
-import ImageConf from "../assets/confirmation.png";
+import ImageConf from "../../assets/confirmation.png";
 import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
+import {  useNavigate } from "react-router-dom";
 
 const EmailConfirmation = () => {
     const { user } = useContext(AuthContext);
