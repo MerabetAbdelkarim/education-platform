@@ -37,7 +37,7 @@ const Navbar = () => {
     };
 
     return (
-        <Box bg="white" p={4}>
+        <Box bg="white" p={4} borderBottom={"1px solid #e2e8f0"}>
             <Flex alignItems="center">
                 <Heading size="md" color='purple.800'>
                     <Link to="/">EduApp</Link>
@@ -45,7 +45,7 @@ const Navbar = () => {
                 <Spacer />
                 {user ? (
                     <>
-                        <Box color="white" mr={4}>
+                        <Box color="black" mr={4}>
                             {role === 'teacher' ? 'Teacher' : 'Student'}: {user.email}
                         </Box>
                         <Button colorScheme="red" onClick={handleSignOut}>
