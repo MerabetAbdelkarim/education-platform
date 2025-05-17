@@ -12,14 +12,14 @@ const RoleSelection = () => {
                 <Text fontSize="lg">Are you a teacher or a student?</Text>
                 <SimpleGrid columns={[1, 2]} spacing={4}>
                     <Button
-                        colorScheme="teal"
+                        colorScheme="purple"
                         size="lg"
                         onClick={() => navigate('/register/teacher')}
                     >
                         Teacher
                     </Button>
                     <Button
-                        colorScheme="teal"
+                        colorScheme="purple"
                         size="lg"
                         onClick={() => navigate('/register/student')}
                     >

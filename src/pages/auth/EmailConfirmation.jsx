@@ -1,14 +1,14 @@
-import { Box, Text, Button, Link, VStack, Divider, Center, Img } from "@chakra-ui/react";
+import { Box, Text, Button, Link, VStack, Divider, Center, Img, Flex } from "@chakra-ui/react";
 import ImageConf from "../../assets/confirmation.png";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const EmailConfirmation = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     return (
-        <Center minH="calc(100vh - 72px)" bg="gray.100">
+        <Flex justifyContent={"center"} alignItems={"center"}>
             <Box
                 maxW="md"
                 w="full"
@@ -16,7 +16,6 @@ const EmailConfirmation = () => {
                 bg="white"
                 borderRadius="md"
                 boxShadow="md"
-                textAlign="center"
             >
                 <VStack spacing={4}>
                     <Img
@@ -36,7 +35,7 @@ const EmailConfirmation = () => {
                         Go to login page after confirming your email address.
                         <Link
                             as="button"
-                            color="blue.500"
+                            color="purple"
                             fontWeight="bold"
                             onClick={() => navigate('/login')}
                         >
@@ -45,7 +44,7 @@ const EmailConfirmation = () => {
                     </Text>
                 </VStack>
             </Box>
-        </Center>
+        </Flex>
     );
 };
 

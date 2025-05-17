@@ -122,7 +122,7 @@ const Register = () => {
                         </FormControl>
                     )}
                     <Button
-                        colorScheme="teal"
+                        colorScheme="purple"
                         type="submit"
                         isLoading={loading}
                         width="full"
@@ -135,7 +135,7 @@ const Register = () => {
                 Already have an account?{' '}
                 <Button
                     variant="link"
-                    colorScheme="teal"
+                    colorScheme="purple"
                     onClick={() => navigate('/login')}
                 >
                     Login
