@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Flex,
@@ -22,24 +22,15 @@ import {
     ModalBody,
     ModalCloseButton,
     useToast,
-    Spinner,
     VStack,
     HStack,
     IconButton,
-    useColorModeValue,
     TableContainer,
 } from '@chakra-ui/react';
-import { MdAdd, MdDeleteOutline } from "react-icons/md";;
-import { supabase } from '../../../supabase';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../../context/AuthContext';
-import { AdvancedTable } from '../../../components/Table';
+import { MdDeleteOutline } from "react-icons/md";;
+import { supabase } from '../../../../supabase';
 
-const classDetails = () => {
-    const { user, role, loading: authLoading } = useContext(AuthContext);
-    const [teacher, setTeacher] = useState(null);
-    const [classes, setClasses] = useState([]);
-    const [selectedClass, setSelectedClass] = useState(null);
+const ClassDetails = ({ selectedClass }) => {
     const [students, setStudents] = useState([]);
     const [lessons, setLessons] = useState([]);
     const [isClassModalOpen, setIsClassModalOpen] = useState(false);
@@ -50,175 +41,57 @@ const classDetails = () => {
     const [newLesson, setNewLesson] = useState({ name: '', pdf_file: null });
     const [isLoading, setIsLoading] = useState(false);
     const toast = useToast();
-    const navigate = useNavigate();
 
-    // Fetch teacher data
+
+
     useEffect(() => {
-        if (authLoading) return;
-
-        if (!user || role !== 'teacher') {
-            navigate('/login');
-            return;
-        }
-
-        const fetchTeacher = async () => {
+        const fetchClassDetails = async ({ classId }) => {
             setIsLoading(true);
-            const { data: teacherData, error } = await supabase
-                .from('teachers')
-                .select('id, first_name, last_name')
-                .eq('user_id', user.id)
-                .single();
-
-            if (error) {
+            // Fetch students
+            const { data: studentData, error: studentError } = await supabase
+                .from('class_enrollments')
+                .select(`student_id,students(studentId, first_name, last_name, email)`)
+                .eq('class_id', classId);
+            // Fetch lessons and generate signed URLs
+            const { data: lessonData, error: lessonError } = await supabase
+                .from('lessons')
+                .select('id, name, pdf_url, created_at')
+                .eq('class_id', classId)
+                .order('created_at', { ascending: false });
+            if (studentError || lessonError) {
                 toast({
                     title: 'Error',
-                    description: 'Failed to load teacher profile',
+                    description: 'Failed to load class details',
                     status: 'error',
                     duration: 3000,
                     isClosable: true,
                 });
+                setIsLoading(false);
                 return;
             }
-            setTeacher(teacherData);
-            await fetchClasses(teacherData.id);
+
+            // Generate signed URLs for lesson PDFs
+            const lessonsWithUrls = await Promise.all(
+                lessonData.map(async (lesson) => {
+                    const { data: signedUrlData, error: urlError } = await supabase.storage
+                        .from('lessons')
+                        .createSignedUrl(lesson.pdf_url, 3600); // 1-hour expiry
+                    if (urlError) {
+                        console.error('Error generating signed URL:', urlError);
+                        return { ...lesson, pdf_url: null };
+                    }
+                    return { ...lesson, pdf_url: signedUrlData.signedUrl };
+                })
+            );
+
+            setStudents(studentData);
+
+            setLessons(lessonsWithUrls);
             setIsLoading(false);
         };
+        fetchClassDetails(selectedClass?.id)
+    }, [selectedClass?.id])
 
-        fetchTeacher();
-    }, [user, role, authLoading, navigate, toast]);
-
-    const fetchClasses = async (teacherId) => {
-        setIsLoading(true);
-        const { data, error } = await supabase
-            .from('classes')
-            .select('id, name, description')
-            .eq('teacher_id', teacherId)
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            toast({
-                title: 'Error',
-                description: 'Failed to load classes',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-        } else {
-            setClasses(data);
-        }
-        setIsLoading(false);
-    };
-
-    const fetchClassDetails = async (classId) => {
-        setIsLoading(true);
-        // Fetch students
-        const { data: studentData, error: studentError } = await supabase
-            .from('class_enrollments')
-            .select(`student_id,students(studentId, first_name, last_name, email)`)
-            .eq('class_id', classId);
-        // Fetch lessons and generate signed URLs
-        const { data: lessonData, error: lessonError } = await supabase
-            .from('lessons')
-            .select('id, name, pdf_url, created_at')
-            .eq('class_id', classId)
-            .order('created_at', { ascending: false });
-        if (studentError || lessonError) {
-            toast({
-                title: 'Error',
-                description: 'Failed to load class details',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-            setIsLoading(false);
-            return;
-        }
-
-        // Generate signed URLs for lesson PDFs
-        const lessonsWithUrls = await Promise.all(
-            lessonData.map(async (lesson) => {
-                const { data: signedUrlData, error: urlError } = await supabase.storage
-                    .from('lessons')
-                    .createSignedUrl(lesson.pdf_url, 3600); // 1-hour expiry
-                if (urlError) {
-                    console.error('Error generating signed URL:', urlError);
-                    return { ...lesson, pdf_url: null };
-                }
-                return { ...lesson, pdf_url: signedUrlData.signedUrl };
-            })
-        );
-
-        setStudents(studentData);
-
-        setLessons(lessonsWithUrls);
-        setIsLoading(false);
-    };
-
-    const handleCreateClass = async () => {
-        setIsLoading(true);
-        const { error } = await supabase
-            .from('classes')
-            .insert({
-                teacher_id: teacher.id,
-                name: newClass.name,
-                description: newClass.description,
-            });
-
-        if (error) {
-            toast({
-                title: 'Error',
-                description: 'Failed to create class',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-        } else {
-            toast({
-                title: 'Success',
-                description: 'Class created successfully',
-                status: 'success',
-                duration: 3000,
-                isClosable: true,
-            });
-            await fetchClasses(teacher.id);
-            setNewClass({ name: '', description: '' });
-            setIsClassModalOpen(false);
-        }
-        setIsLoading(false);
-    };
-
-    const handleDeleteClass = async (classId) => {
-        setIsLoading(true);
-        const { error } = await supabase
-            .from('classes')
-            .delete()
-            .eq('id', classId);
-
-        if (error) {
-            toast({
-                title: 'Error',
-                description: 'Failed to delete class',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-        } else {
-            toast({
-                title: 'Success',
-                description: 'Class deleted successfully',
-                status: 'success',
-                duration: 3000,
-                isClosable: true,
-            });
-            await fetchClasses(teacher.id);
-            if (selectedClass?.id === classId) {
-                setSelectedClass(null);
-                setStudents([]);
-                setLessons([]);
-            }
-        }
-        setIsLoading(false);
-    };
 
     const handleEnrollStudent = async () => {
         setIsLoading(true);
@@ -380,115 +253,9 @@ const classDetails = () => {
         setIsLoading(false);
     };
 
-    if (authLoading || isLoading || !teacher) {
-        return (
-            <Flex justify="center" align="center" minH="100vh">
-                <Spinner size="xl" />
-            </Flex>
-        );
-    }
-
-
     return (
         <Box p={8}>
             <VStack spacing={8} align="stretch">
-                {/* Teacher Profile */}
-                <Box>
-                    <Flex justify="space-between" align="center">
-                        <Heading size="lg">Teacher Dashboard</Heading>
-                    </Flex>
-                    <Text mt={2}>
-                        Welcome, {teacher.first_name} {teacher.last_name} ({user.email})
-                    </Text>
-                </Box>
-
-                {/* Classes Section */}
-                <Box>
-                    <Flex justify="space-between" align="center" mb={6}>
-                        <Heading size="md" color={useColorModeValue("gray.800", "white")}>
-                            Your Classes
-                        </Heading>
-                        <Button
-                            colorScheme="blue"
-                            onClick={() => setIsClassModalOpen(true)}
-                            leftIcon={<MdAdd />}
-                            size="sm"
-                        >
-                            Create Class
-                        </Button>
-                    </Flex>
-
-                    {classes.length === 0 ? (
-                        <Box
-                            p={8}
-                            textAlign="center"
-                            borderWidth="1px"
-                            borderRadius="lg"
-                            borderColor={useColorModeValue("gray.200", "gray.700")}
-                        >
-                            <Text mb={4} color={useColorModeValue("gray.600", "gray.400")}>
-                                No classes found. Create a new class to get started.
-                            </Text>
-                            <Button
-                                colorScheme="blue"
-                                variant="outline"
-                                onClick={() => (true)}
-                                size="sm"
-                            >
-                                Create Your First Class
-                            </Button>
-                        </Box>
-                    ) : (
-                        <TableContainer
-                            borderWidth="1px"
-                            borderRadius="lg"
-                            borderColor={useColorModeValue("gray.200", "gray.700")}
-                        >
-                            <Table variant="simple" size="md">
-                                <Thead bg={useColorModeValue("gray.50", "gray.800")}>
-                                    <Tr>
-                                        <Th px={4} py={3}>Name</Th>
-                                        <Th px={4} py={3}>Description</Th>
-                                        <Th px={4} py={3} textAlign="right">Actions</Th>
-                                    </Tr>
-                                </Thead>
-                                <Tbody>
-                                    {classes.map((cls) => (
-                                        <Tr key={cls.id} _hover={{ bg: useColorModeValue("gray.50", "gray.700") }}>
-                                            <Td px={4} py={3}>
-                                                <Button
-                                                    variant="link"
-                                                    colorScheme="blue"
-                                                    fontWeight="medium"
-                                                    onClick={() => {
-                                                        setSelectedClass(cls);
-                                                        fetchClassDetails(cls.id);
-                                                    }}
-                                                >
-                                                    {cls.name}
-                                                </Button>
-                                            </Td>
-                                            <Td px={4} py={3} color={useColorModeValue("gray.600", "gray.300")}>
-                                                {cls.description}
-                                            </Td>
-                                            <Td px={4} py={3} textAlign="right">
-                                                <IconButton
-                                                    icon={<MdDeleteOutline />}
-                                                    aria-label={`Delete ${cls.name}`}
-                                                    colorScheme="red"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleDeleteClass(cls.id)}
-                                                    isDisabled={isLoading}
-                                                />
-                                            </Td>
-                                        </Tr>
-                                    ))}
-                                </Tbody>
-                            </Table>
-                        </TableContainer>
-                    )}
-                </Box>
 
                 {/* Class Details Section */}
                 {
@@ -597,53 +364,6 @@ const classDetails = () => {
                 }
             </VStack >
 
-            {/* Create Class Modal */}
-            < Modal isOpen={isClassModalOpen} onClose={() => setIsClassModalOpen(false)}>
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Create New Class</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <VStack spacing={4}>
-                            <FormControl>
-                                <FormLabel>Class Name</FormLabel>
-                                <Input
-                                    value={newClass.name}
-                                    onChange={(e) =>
-                                        setNewClass({ ...newClass, name: e.target.value })
-                                    }
-                                />
-                            </FormControl>
-                            <FormControl>
-                                <FormLabel>Description</FormLabel>
-                                <Input
-                                    value={newClass.description}
-                                    onChange={(e) =>
-                                        setNewClass({ ...newClass, description: e.target.value })
-                                    }
-                                />
-                            </FormControl>
-                        </VStack>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button
-                            colorScheme="blue"
-                            mr={3}
-                            onClick={handleCreateClass}
-                            isLoading={isLoading}
-                        >
-                            Create
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            onClick={() => setIsClassModalOpen(false)}
-                            isDisabled={isLoading}
-                        >
-                            Cancel
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal >
 
             {/* Enroll Student Modal */}
             < Modal
@@ -735,4 +455,4 @@ const classDetails = () => {
     );
 };
 
-export default classDetails;
+export default ClassDetails;

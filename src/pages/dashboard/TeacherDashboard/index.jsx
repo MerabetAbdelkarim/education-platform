@@ -28,6 +28,9 @@ import {
     IconButton,
     useColorModeValue,
     TableContainer,
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
 } from '@chakra-ui/react';
 import { MdAdd, MdDeleteOutline } from "react-icons/md";;
 import { supabase } from '../../../supabase';
@@ -35,12 +38,14 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
 import { AdvancedTable } from '../../../components/Table';
 import ClassesComponent from './components/Classes';
+import ClassDetails from './components/ClassDetails';
 
 const TeacherDashboard = () => {
     const { user, role, loading: authLoading } = useContext(AuthContext);
     const [teacher, setTeacher] = useState(null);
     const [classes, setClasses] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedClass, setSelectedClass] = useState(null);
     const toast = useToast();
     const navigate = useNavigate();
 
@@ -119,7 +124,26 @@ const TeacherDashboard = () => {
                         Welcome, {teacher.first_name} {teacher.last_name} ({user.email})
                     </Text>
                 </Box>
-                <ClassesComponent classes={classes} teacher={teacher} setClasses={setClasses} />
+                <Breadcrumb>
+                    <BreadcrumbItem>
+                        <BreadcrumbLink>Dashboard</BreadcrumbLink>
+                    </BreadcrumbItem>
+
+                    <BreadcrumbItem>
+                        <BreadcrumbLink color={!selectedClass && 'purple.500'} onClick={() => setSelectedClass(null)}>Classes</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    {selectedClass &&
+                        <BreadcrumbItem isCurrentPage>
+                            <BreadcrumbLink color='purple.500' href='#'>ClassDetails</BreadcrumbLink>
+                        </BreadcrumbItem>
+                    }
+                </Breadcrumb>
+                {
+                    selectedClass ?
+                        <ClassDetails selectedClass={selectedClass} /> :
+                        <ClassesComponent classes={classes} teacher={teacher} setClasses={setClasses} setSelectedClass={setSelectedClass} />
+                }
+
             </VStack >
         </Box >
     );

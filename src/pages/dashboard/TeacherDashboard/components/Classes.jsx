@@ -21,11 +21,10 @@ import { MdAdd, MdDeleteOutline } from "react-icons/md";
 import CreateClassModal from '../model/createClassModal';
 import DeleteClassModal from '../model/DeleteClassModal';
 
-const ClassesComponent = ({ classes, teacher, setClasses }) => {
-    const [selectedClass, setSelectedClass] = useState(null);
+const ClassesComponent = ({ classes, teacher, setClasses, setSelectedClass }) => {
+
     const { isOpen: isOpenCreate, onOpen: onOpenCreate, onClose: onCloseCreate } = useDisclosure()
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
-    const [isLoading, setIsLoading] = useState(false);
     const [selectedClassId, setSelectedClassId] = useState(null);
 
     const handleOpenDelete = (classId) => {
@@ -101,7 +100,6 @@ const ClassesComponent = ({ classes, teacher, setClasses }) => {
                                                     fontWeight="medium"
                                                     onClick={() => {
                                                         setSelectedClass(cls);
-                                                        // fetchClassDetails(cls.id);
                                                     }}
                                                 >
                                                     {cls.name}
@@ -118,7 +116,6 @@ const ClassesComponent = ({ classes, teacher, setClasses }) => {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => handleOpenDelete(cls.id)}
-                                                    isDisabled={isLoading}
                                                 />
                                             </Td>
                                         </Tr>
