@@ -23,7 +23,7 @@ A modern, interactive learning platform built with React and Vite that connects 
 1. Clone the repository:
 
 ```bash
-git clone [https://github.com/yourusername/education-platform.git](https://github.com/MerabetAbdelkarim/education-platform.git)
+git clone https://github.com/MerabetAbdelkarim/education-platform.git
 ```
 
 2. Navigate to the project directory:
