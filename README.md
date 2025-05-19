@@ -5,6 +5,11 @@
 
 A modern, interactive learning platform built with React and Vite that connects students, educators, and content in one seamless experience.
 
+## 🚀 Live Demo
+
+The project is deployed and accessible at:  
+[https://education-platform-xi.vercel.app/](https://education-platform-xi.vercel.app/)
+
 ## 🚀 Features
 
 - **Interactive Learning Modules**: Engage with content through quizzes, videos, and interactive exercises
