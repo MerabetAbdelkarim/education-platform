@@ -23,7 +23,7 @@ A modern, interactive learning platform built with React and Vite that connects 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/education-platform.git
+git clone https://github.com/MerabetAbdelkarim/education-platform.git
 ```
 
 2. Navigate to the project directory:
@@ -72,55 +72,13 @@ education-platform/
 
 - [React](https://reactjs.org/) - UI library
 - [Vite](https://vitejs.dev/) - Build tool and development server
+- [Chakra UI](https://chakra-ui.com/) - Component library for beautiful, accessible UI
+- [Supabase](https://supabase.io/) - Open source Firebase alternative for backend
 - [React Router](https://reactrouter.com/) - Navigation and routing
-- [Axios](https://axios-http.com/) - HTTP client
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [React Icons](https://react-icons.github.io/react-icons/) - Icon library
 
-## 📱 Screenshots
 
-![Dashboard](https://placeholder.com/dashboard.png)
-![Course View](https://placeholder.com/course.png)
-![Mobile View](https://placeholder.com/mobile.png)
 
-## 🧪 Running Tests
-
-```bash
-npm run test
-```
-
-## 🚀 Deployment
-
-1. Build the production-ready application:
-
-```bash
-npm run build
-```
-
-2. Preview the production build locally:
-
-```bash
-npm run preview
-```
-
-3. Deploy the contents of the `dist` folder to your hosting provider.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 📞 Contact
-
-Your Name - [@yourtwitter](https://twitter.com/yourtwitter) - email@example.com
-
-Project Link: [https://github.com/yourusername/education-platform](https://github.com/yourusername/education-platform)
 
 ## 🙏 Acknowledgments
 
