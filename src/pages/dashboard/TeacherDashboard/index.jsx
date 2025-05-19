@@ -4,39 +4,16 @@ import {
     Flex,
     Heading,
     Text,
-    Button,
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
-    Input,
-    FormControl,
-    FormLabel,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
     useToast,
     Spinner,
     VStack,
-    HStack,
-    IconButton,
-    useColorModeValue,
-    TableContainer,
     Breadcrumb,
     BreadcrumbItem,
     BreadcrumbLink,
 } from '@chakra-ui/react';
-import { MdAdd, MdDeleteOutline } from "react-icons/md";;
 import { supabase } from '../../../supabase';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
-import { AdvancedTable } from '../../../components/Table';
 import ClassesComponent from './components/Classes';
 import ClassDetails from './components/ClassDetails';
 
