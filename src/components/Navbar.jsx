@@ -3,12 +3,15 @@ import {
     Box,
     Button,
     Flex,
+    HStack,
     Heading,
+    Img,
     Spacer,
     useToast,
 } from '@chakra-ui/react';
 import { AuthContext } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import ImgLogo from '../assets/logo.svg'
 
 const Navbar = () => {
     const { user, role, signOut } = useContext(AuthContext);
@@ -40,7 +43,10 @@ const Navbar = () => {
         <Box bg="white" p={4} borderBottom={"1px solid #e2e8f0"}>
             <Flex alignItems="center">
                 <Heading size="md" color='purple.800'>
-                    <Link to="/">EduApp</Link>
+                    <HStack>
+                        <Img src={ImgLogo} width={8} />
+                        <Link to="/">EduApp</Link>
+                    </HStack>
                 </Heading>
                 <Spacer />
                 {user ? (

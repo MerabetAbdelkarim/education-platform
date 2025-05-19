@@ -5,7 +5,7 @@ import Register from '../pages/auth/Register';
 import Login from '../pages/auth/Login';
 import EmailConfirmation from '../pages/auth/EmailConfirmation';
 import StudentDashboard from '../pages/dashboard/StudentDashboard';
-import TeacherDashboard from '../pages/dashboard/TeacherDashboard';
+import TeacherDashboard from '../pages/dashboard/TeacherDashboard/indexTwo';
 import GuestOnlyRoute from './GuestOnlyRoute';
 import ProtectedRoute from './ProtectedRoute';
 import NotFoundPage from '../pages/404';
