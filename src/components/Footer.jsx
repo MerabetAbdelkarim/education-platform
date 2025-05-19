@@ -10,7 +10,7 @@ const Footer = () => {
     return (
         <Box bg="gray.100" py={4}>
             <Flex justifyContent={"flex-end"} px={20} >
-                <Heading size="sm">© {year} EduApp</Heading>
+                <Heading size="sm">© {year} LegalVision - رؤية قانونية</Heading>
             </Flex>
         </Box>
     );

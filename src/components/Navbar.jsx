@@ -45,7 +45,7 @@ const Navbar = () => {
                 <Heading size="md" color='purple.800'>
                     <HStack>
                         <Img src={ImgLogo} width={8} />
-                        <Link to="/">EduApp</Link>
+                        <Link to="/">LegalVision</Link>
                     </HStack>
                 </Heading>
                 <Spacer />
