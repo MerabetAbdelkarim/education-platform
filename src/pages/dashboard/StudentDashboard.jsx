@@ -150,7 +150,7 @@ const StudentDashboard = () => {
             <VStack spacing={8} align="stretch">
                 {/* Student Profile */}
                 <Box>
-                    <Skeleton isLoaded={!isStudentLoading} height="40px">
+                    <Skeleton isLoaded={!isStudentLoading} minHeight="40px">
                         <Flex justify="space-between" align="center">
                             <Heading size="lg">Student Dashboard</Heading>
                         </Flex>
@@ -169,12 +169,12 @@ const StudentDashboard = () => {
 
                 {/* Enrolled Classes */}
                 <Box>
-                    <Skeleton isLoaded={!isClassesLoading} height="40px">
+                    <Skeleton isLoaded={!isClassesLoading} minHeight="40px">
                         <Heading size="md" mb={4}>
                             Your Classes
                         </Heading>
                     </Skeleton>
-                    <Skeleton isLoaded={!isClassesLoading} height="200px">
+                    <Skeleton isLoaded={!isClassesLoading} minHeight="200px">
                         {classes.length === 0 ? (
                             <Text>You are not enrolled in any classes.</Text>
                         ) : (
@@ -213,12 +213,12 @@ const StudentDashboard = () => {
                 {/* Lessons for Selected Class */}
                 {selectedClass && (
                     <Box>
-                        <Skeleton isLoaded={!isLessonsLoading} height="40px">
+                        <Skeleton isLoaded={!isLessonsLoading} minHeight="40px">
                             <Heading size="md" mb={4}>
                                 Lessons for {selectedClass.name}
                             </Heading>
                         </Skeleton>
-                        <Skeleton isLoaded={!isLessonsLoading} height="200px">
+                        <Skeleton isLoaded={!isLessonsLoading} minHeight="200px">
                             {lessons.length === 0 ? (
                                 <Text>No lessons available for this class.</Text>
                             ) : (

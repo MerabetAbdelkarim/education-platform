@@ -387,7 +387,7 @@ const TeacherDashboard = () => {
             <VStack spacing={8} align="stretch">
                 {/* Teacher Profile */}
                 <Box>
-                    <Skeleton isLoaded={!isTeacherLoading} height="40px">
+                    <Skeleton isLoaded={!isTeacherLoading} minHeight="40px">
                         <Flex justify="space-between" align="center">
                             <Heading size="lg">Teacher Dashboard</Heading>
                         </Flex>
@@ -403,7 +403,7 @@ const TeacherDashboard = () => {
 
                 {/* Classes Section */}
                 <Box>
-                    <Skeleton isLoaded={!isClassesLoading} height="40px">
+                    <Skeleton isLoaded={!isClassesLoading} minHeight="40px">
                         <Flex justify="space-between" align="center" mb={4}>
                             <Heading size="md">Your Classes</Heading>
                             <Button
@@ -415,7 +415,7 @@ const TeacherDashboard = () => {
                             </Button>
                         </Flex>
                     </Skeleton>
-                    <Skeleton isLoaded={!isClassesLoading} height="200px">
+                    <Skeleton isLoaded={!isClassesLoading} minHeight="200px">
                         {classes.length === 0 ? (
                             <Text>No classes found. Create a new class to get started.</Text>
                         ) : (
@@ -463,7 +463,7 @@ const TeacherDashboard = () => {
                 {/* Class Details Section */}
                 {selectedClass && (
                     <Box>
-                        <Skeleton isLoaded={!isClassDetailsLoading} height="40px">
+                        <Skeleton isLoaded={!isClassDetailsLoading} minHeight="40px">
                             <Heading size="md" mb={4}>
                                 {selectedClass.name} Details
                             </Heading>
@@ -471,7 +471,7 @@ const TeacherDashboard = () => {
                         <VStack spacing={6} align="stretch">
                             {/* Students */}
                             <Box>
-                                <Skeleton isLoaded={!isClassDetailsLoading} height="40px">
+                                <Skeleton isLoaded={!isClassDetailsLoading} minHeight="40px">
                                     <Flex justify="space-between" align="center" mb={4}>
                                         <Heading size="sm">Enrolled Students</Heading>
                                         <Button
@@ -484,7 +484,7 @@ const TeacherDashboard = () => {
                                         </Button>
                                     </Flex>
                                 </Skeleton>
-                                <Skeleton isLoaded={!isClassDetailsLoading} height="200px">
+                                <Skeleton isLoaded={!isClassDetailsLoading} minHeight="200px">
                                     {students.length === 0 ? (
                                         <Text>No students enrolled in this class.</Text>
                                     ) : (
@@ -514,7 +514,7 @@ const TeacherDashboard = () => {
 
                             {/* Lessons */}
                             <Box>
-                                <Skeleton isLoaded={!isClassDetailsLoading} height="40px">
+                                <Skeleton isLoaded={!isClassDetailsLoading} minHeight="40px">
                                     <Flex justify="space-between" align="center" mb={4}>
                                         <Heading size="sm">Lessons</Heading>
                                         <Button
@@ -527,7 +527,7 @@ const TeacherDashboard = () => {
                                         </Button>
                                     </Flex>
                                 </Skeleton>
-                                <Skeleton isLoaded={!isClassDetailsLoading} height="200px">
+                                <Skeleton isLoaded={!isClassDetailsLoading} minHeight="200px">
                                     {lessons.length === 0 ? (
                                         <Text>No lessons for this class.</Text>
                                     ) : (
