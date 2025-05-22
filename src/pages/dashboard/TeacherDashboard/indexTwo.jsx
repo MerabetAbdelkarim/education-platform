@@ -285,23 +285,44 @@ const TeacherDashboard = () => {
             return;
         }
 
+        // Sanitize the file name to remove non-ASCII characters
+        const sanitizeFileName = (name) => {
+            // Replace non-ASCII characters with an underscore or remove them
+            const sanitized = name
+                .normalize('NFKD') // Decompose Unicode characters
+                .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+                .replace(/[^\w\s.-]/g, '') // Remove non-alphanumeric characters (except spaces, dots, and hyphens)
+                .replace(/\s+/g, '_') // Replace spaces with underscores
+                .toLowerCase(); // Convert to lowercase for consistency
+            return sanitized;
+        };
+
         // Generate a unique file name
-        const fileName = `${Date.now()}-${newLesson.pdf_file.name}`;
+        const originalFileName = newLesson.pdf_file.name;
+        const sanitizedFileName = sanitizeFileName(originalFileName);
+        console.log("sanitizedFileName",sanitizedFileName)
+        const fileExtension = originalFileName.split('.').pop();
+        const fileName = `${Date.now()}-${sanitizedFileName}.${fileExtension}`;
+        console.log("fileName",fileName)
+        // Upload the file to Supabase Storage
         const { error: uploadError } = await supabase.storage
             .from('lessons')
             .upload(fileName, newLesson.pdf_file);
+
         if (uploadError) {
+            console.error('Upload error:', uploadError); // Log detailed error for debugging
             toast({
                 title: 'Error',
-                description: 'Failed to upload PDF',
+                description: `Failed to upload PDF: ${uploadError.message}`,
                 status: 'error',
-                duration: 3000,
+                duration: 5000,
                 isClosable: true,
             });
             setIsActionLoading(false);
             return;
         }
 
+        // Insert the lesson record into the database
         const { error } = await supabase
             .from('lessons')
             .insert({
@@ -623,7 +644,6 @@ const TeacherDashboard = () => {
                 </ModalContent>
             </Modal>
 
-            {/* Enroll Student Modal */}
             <Modal isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)}>
                 <ModalOverlay />
                 <ModalContent>
@@ -658,7 +678,6 @@ const TeacherDashboard = () => {
                 </ModalContent>
             </Modal>
 
-            {/* Add Lesson Modal */}
             <Modal isOpen={isLessonModalOpen} onClose={() => setIsLessonModalOpen(false)}>
                 <ModalOverlay />
                 <ModalContent>
