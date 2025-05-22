@@ -22,12 +22,13 @@ import {
     ModalBody,
     ModalCloseButton,
     useToast,
-    Spinner,
+    Skeleton,
+    SkeletonText,
     VStack,
     HStack,
     IconButton,
 } from '@chakra-ui/react';
-import { MdDeleteOutline } from "react-icons/md";;
+import { MdDeleteOutline } from 'react-icons/md';
 import { supabase } from '../../../supabase';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
@@ -45,7 +46,10 @@ const TeacherDashboard = () => {
     const [newClass, setNewClass] = useState({ name: '', description: '' });
     const [newStudentId, setNewStudentId] = useState('');
     const [newLesson, setNewLesson] = useState({ name: '', pdf_file: null });
-    const [isLoading, setIsLoading] = useState(false);
+    const [isTeacherLoading, setIsTeacherLoading] = useState(false);
+    const [isClassesLoading, setIsClassesLoading] = useState(false);
+    const [isClassDetailsLoading, setIsClassDetailsLoading] = useState(false);
+    const [isActionLoading, setIsActionLoading] = useState(false);
     const toast = useToast();
     const navigate = useNavigate();
 
@@ -59,7 +63,7 @@ const TeacherDashboard = () => {
         }
 
         const fetchTeacher = async () => {
-            setIsLoading(true);
+            setIsTeacherLoading(true);
             const { data: teacherData, error } = await supabase
                 .from('teachers')
                 .select('id, first_name, last_name')
@@ -74,18 +78,19 @@ const TeacherDashboard = () => {
                     duration: 3000,
                     isClosable: true,
                 });
+                setIsTeacherLoading(false);
                 return;
             }
             setTeacher(teacherData);
+            setIsTeacherLoading(false);
             await fetchClasses(teacherData.id);
-            setIsLoading(false);
         };
 
         fetchTeacher();
     }, [user, role, authLoading, navigate, toast]);
 
     const fetchClasses = async (teacherId) => {
-        setIsLoading(true);
+        setIsClassesLoading(true);
         const { data, error } = await supabase
             .from('classes')
             .select('id, name, description')
@@ -103,15 +108,15 @@ const TeacherDashboard = () => {
         } else {
             setClasses(data);
         }
-        setIsLoading(false);
+        setIsClassesLoading(false);
     };
 
     const fetchClassDetails = async (classId) => {
-        setIsLoading(true);
+        setIsClassDetailsLoading(true);
         // Fetch students
         const { data: studentData, error: studentError } = await supabase
             .from('class_enrollments')
-            .select(`student_id,students(studentId, first_name, last_name, email)`)
+            .select(`student_id, students(studentId, first_name, last_name, email)`)
             .eq('class_id', classId);
         // Fetch lessons and generate signed URLs
         const { data: lessonData, error: lessonError } = await supabase
@@ -119,6 +124,7 @@ const TeacherDashboard = () => {
             .select('id, name, pdf_url, created_at')
             .eq('class_id', classId)
             .order('created_at', { ascending: false });
+
         if (studentError || lessonError) {
             toast({
                 title: 'Error',
@@ -127,7 +133,7 @@ const TeacherDashboard = () => {
                 duration: 3000,
                 isClosable: true,
             });
-            setIsLoading(false);
+            setIsClassDetailsLoading(false);
             return;
         }
 
@@ -146,13 +152,12 @@ const TeacherDashboard = () => {
         );
 
         setStudents(studentData);
-
         setLessons(lessonsWithUrls);
-        setIsLoading(false);
+        setIsClassDetailsLoading(false);
     };
 
     const handleCreateClass = async () => {
-        setIsLoading(true);
+        setIsActionLoading(true);
         const { error } = await supabase
             .from('classes')
             .insert({
@@ -181,11 +186,11 @@ const TeacherDashboard = () => {
             setNewClass({ name: '', description: '' });
             setIsClassModalOpen(false);
         }
-        setIsLoading(false);
+        setIsActionLoading(false);
     };
 
     const handleDeleteClass = async (classId) => {
-        setIsLoading(true);
+        setIsActionLoading(true);
         const { error } = await supabase
             .from('classes')
             .delete()
@@ -214,11 +219,11 @@ const TeacherDashboard = () => {
                 setLessons([]);
             }
         }
-        setIsLoading(false);
+        setIsActionLoading(false);
     };
 
     const handleEnrollStudent = async () => {
-        setIsLoading(true);
+        setIsActionLoading(true);
         const { data: student, error: studentError } = await supabase
             .from('students')
             .select('id')
@@ -233,7 +238,7 @@ const TeacherDashboard = () => {
                 duration: 3000,
                 isClosable: true,
             });
-            setIsLoading(false);
+            setIsActionLoading(false);
             return;
         }
         const { error } = await supabase
@@ -263,12 +268,11 @@ const TeacherDashboard = () => {
             setNewStudentId('');
             setIsStudentModalOpen(false);
         }
-        setIsLoading(false);
+        setIsActionLoading(false);
     };
 
     const handleAddLesson = async () => {
-        console.log("Adding lesson:", newLesson);
-        setIsLoading(true);
+        setIsActionLoading(true);
         if (!newLesson.pdf_file) {
             toast({
                 title: 'Error',
@@ -277,7 +281,7 @@ const TeacherDashboard = () => {
                 duration: 3000,
                 isClosable: true,
             });
-            setIsLoading(false);
+            setIsActionLoading(false);
             return;
         }
 
@@ -294,16 +298,10 @@ const TeacherDashboard = () => {
                 duration: 3000,
                 isClosable: true,
             });
-            setIsLoading(false);
+            setIsActionLoading(false);
             return;
         }
 
-        const dataO = {
-            class_id: selectedClass.id,
-            name: newLesson.name,
-            pdf_url: fileName,
-        }
-        console.log("Data to insert:", dataO);
         const { error } = await supabase
             .from('lessons')
             .insert({
@@ -313,10 +311,9 @@ const TeacherDashboard = () => {
             });
 
         if (error) {
-            console.log("error", error)
             toast({
                 title: 'Error',
-                description: error,
+                description: error.message,
                 status: 'error',
                 duration: 3000,
                 isClosable: true,
@@ -333,11 +330,11 @@ const TeacherDashboard = () => {
             setNewLesson({ name: '', pdf_file: null });
             setIsLessonModalOpen(false);
         }
-        setIsLoading(false);
+        setIsActionLoading(false);
     };
 
     const handleDeleteLesson = async (lessonId, pdfPath) => {
-        setIsLoading(true);
+        setIsActionLoading(true);
         // Delete the lesson record
         const { error: deleteLessonError } = await supabase
             .from('lessons')
@@ -352,7 +349,7 @@ const TeacherDashboard = () => {
                 duration: 3000,
                 isClosable: true,
             });
-            setIsLoading(false);
+            setIsActionLoading(false);
             return;
         }
 
@@ -374,10 +371,10 @@ const TeacherDashboard = () => {
             isClosable: true,
         });
         await fetchClassDetails(selectedClass.id);
-        setIsLoading(false);
+        setIsActionLoading(false);
     };
 
-    if (authLoading || isLoading || !teacher) {
+    if (authLoading) {
         return (
             <Flex justify="center" align="center" minH="100vh">
                 <Spinner size="xl" />
@@ -390,84 +387,104 @@ const TeacherDashboard = () => {
             <VStack spacing={8} align="stretch">
                 {/* Teacher Profile */}
                 <Box>
-                    <Flex justify="space-between" align="center">
-                        <Heading size="lg">Teacher Dashboard</Heading>
-                    </Flex>
-                    <Text mt={2}>
-                        Welcome, {teacher.first_name} {teacher.last_name} ({user.email})
-                    </Text>
+                    <Skeleton isLoaded={!isTeacherLoading} height="40px">
+                        <Flex justify="space-between" align="center">
+                            <Heading size="lg">Teacher Dashboard</Heading>
+                        </Flex>
+                    </Skeleton>
+                    <SkeletonText isLoaded={!isTeacherLoading} mt={2} noOfLines={2} spacing="4">
+                        {teacher && (
+                            <Text mt={2}>
+                                Welcome, {teacher.first_name} {teacher.last_name} ({user.email})
+                            </Text>
+                        )}
+                    </SkeletonText>
                 </Box>
 
                 {/* Classes Section */}
                 <Box>
-                    <Flex justify="space-between" align="center" mb={4}>
-                        <Heading size="md">Your Classes</Heading>
-                        <Button colorScheme="blue" onClick={() => setIsClassModalOpen(true)}>
-                            Create Class
-                        </Button>
-                    </Flex>
-                    {classes.length === 0 ? (
-                        <Text>No classes found. Create a new class to get started.</Text>
-                    ) : (
-                        <Table variant="simple">
-                            <Thead>
-                                <Tr>
-                                    <Th>Name</Th>
-                                    <Th>Description</Th>
-                                    <Th>Actions</Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {classes.map((cls) => (
-                                    <Tr key={cls.id}>
-                                        <Td>
-                                            <Button
-                                                variant="link"
-                                                onClick={() => {
-                                                    setSelectedClass(cls);
-                                                    fetchClassDetails(cls.id);
-                                                }}
-                                            >
-                                                {cls.name}
-                                            </Button>
-                                        </Td>
-                                        <Td>{cls.description}</Td>
-                                        <Td>
-                                            <IconButton
-                                                icon={<MdDeleteOutline />}
-                                                colorScheme="red"
-                                                size="sm"
-                                                onClick={() => handleDeleteClass(cls.id)}
-                                                isDisabled={isLoading}
-                                            />
-                                        </Td>
+                    <Skeleton isLoaded={!isClassesLoading} height="40px">
+                        <Flex justify="space-between" align="center" mb={4}>
+                            <Heading size="md">Your Classes</Heading>
+                            <Button
+                                colorScheme="blue"
+                                onClick={() => setIsClassModalOpen(true)}
+                                isDisabled={isActionLoading}
+                            >
+                                Create Class
+                            </Button>
+                        </Flex>
+                    </Skeleton>
+                    <Skeleton isLoaded={!isClassesLoading} height="200px">
+                        {classes.length === 0 ? (
+                            <Text>No classes found. Create a new class to get started.</Text>
+                        ) : (
+                            <Table variant="simple">
+                                <Thead>
+                                    <Tr>
+                                        <Th>Name</Th>
+                                        <Th>Description</Th>
+                                        <Th>Actions</Th>
                                     </Tr>
-                                ))}
-                            </Tbody>
-                        </Table>
-                    )}
+                                </Thead>
+                                <Tbody>
+                                    {classes.map((cls) => (
+                                        <Tr key={cls.id}>
+                                            <Td>
+                                                <Button
+                                                    variant="link"
+                                                    onClick={() => {
+                                                        setSelectedClass(cls);
+                                                        fetchClassDetails(cls.id);
+                                                    }}
+                                                    isDisabled={isActionLoading}
+                                                >
+                                                    {cls.name}
+                                                </Button>
+                                            </Td>
+                                            <Td>{cls.description}</Td>
+                                            <Td>
+                                                <IconButton
+                                                    icon={<MdDeleteOutline />}
+                                                    colorScheme="red"
+                                                    size="sm"
+                                                    onClick={() => handleDeleteClass(cls.id)}
+                                                    isDisabled={isActionLoading}
+                                                />
+                                            </Td>
+                                        </Tr>
+                                    ))}
+                                </Tbody>
+                            </Table>
+                        )}
+                    </Skeleton>
                 </Box>
 
                 {/* Class Details Section */}
-                {
-                    selectedClass && (
-                        <Box>
+                {selectedClass && (
+                    <Box>
+                        <Skeleton isLoaded={!isClassDetailsLoading} height="40px">
                             <Heading size="md" mb={4}>
                                 {selectedClass.name} Details
                             </Heading>
-                            <VStack spacing={6} align="stretch">
-                                {/* Students */}
-                                <Box>
+                        </Skeleton>
+                        <VStack spacing={6} align="stretch">
+                            {/* Students */}
+                            <Box>
+                                <Skeleton isLoaded={!isClassDetailsLoading} height="40px">
                                     <Flex justify="space-between" align="center" mb={4}>
                                         <Heading size="sm">Enrolled Students</Heading>
                                         <Button
                                             size="sm"
                                             colorScheme="blue"
                                             onClick={() => setIsStudentModalOpen(true)}
+                                            isDisabled={isActionLoading}
                                         >
                                             Enroll Student
                                         </Button>
                                     </Flex>
+                                </Skeleton>
+                                <Skeleton isLoaded={!isClassDetailsLoading} height="200px">
                                     {students.length === 0 ? (
                                         <Text>No students enrolled in this class.</Text>
                                     ) : (
@@ -492,20 +509,25 @@ const TeacherDashboard = () => {
                                             </Tbody>
                                         </Table>
                                     )}
-                                </Box>
+                                </Skeleton>
+                            </Box>
 
-                                {/* Lessons */}
-                                <Box>
+                            {/* Lessons */}
+                            <Box>
+                                <Skeleton isLoaded={!isClassDetailsLoading} height="40px">
                                     <Flex justify="space-between" align="center" mb={4}>
                                         <Heading size="sm">Lessons</Heading>
                                         <Button
                                             size="sm"
                                             colorScheme="blue"
                                             onClick={() => setIsLessonModalOpen(true)}
+                                            isDisabled={isActionLoading}
                                         >
                                             Add Lesson
                                         </Button>
                                     </Flex>
+                                </Skeleton>
+                                <Skeleton isLoaded={!isClassDetailsLoading} height="200px">
                                     {lessons.length === 0 ? (
                                         <Text>No lessons for this class.</Text>
                                     ) : (
@@ -540,7 +562,7 @@ const TeacherDashboard = () => {
                                                                 colorScheme="red"
                                                                 size="sm"
                                                                 onClick={() => handleDeleteLesson(lesson.id, lesson.pdf_url)}
-                                                                isDisabled={isLoading}
+                                                                isDisabled={isActionLoading}
                                                             />
                                                         </Td>
                                                     </Tr>
@@ -548,15 +570,15 @@ const TeacherDashboard = () => {
                                             </Tbody>
                                         </Table>
                                     )}
-                                </Box>
-                            </VStack>
-                        </Box>
-                    )
-                }
-            </VStack >
+                                </Skeleton>
+                            </Box>
+                        </VStack>
+                    </Box>
+                )}
+            </VStack>
 
             {/* Create Class Modal */}
-            < Modal isOpen={isClassModalOpen} onClose={() => setIsClassModalOpen(false)}>
+            <Modal isOpen={isClassModalOpen} onClose={() => setIsClassModalOpen(false)}>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Create New Class</ModalHeader>
@@ -567,9 +589,7 @@ const TeacherDashboard = () => {
                                 <FormLabel>Class Name</FormLabel>
                                 <Input
                                     value={newClass.name}
-                                    onChange={(e) =>
-                                        setNewClass({ ...newClass, name: e.target.value })
-                                    }
+                                    onChange={(e) => setNewClass({ ...newClass, name: e.target.value })}
                                 />
                             </FormControl>
                             <FormControl>
@@ -588,26 +608,23 @@ const TeacherDashboard = () => {
                             colorScheme="blue"
                             mr={3}
                             onClick={handleCreateClass}
-                            isLoading={isLoading}
+                            isLoading={isActionLoading}
                         >
                             Create
                         </Button>
                         <Button
                             variant="ghost"
                             onClick={() => setIsClassModalOpen(false)}
-                            isDisabled={isLoading}
+                            isDisabled={isActionLoading}
                         >
                             Cancel
                         </Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal >
+            </Modal>
 
             {/* Enroll Student Modal */}
-            < Modal
-                isOpen={isStudentModalOpen}
-                onClose={() => setIsStudentModalOpen(false)}
-            >
+            <Modal isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)}>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Enroll Student</ModalHeader>
@@ -626,23 +643,23 @@ const TeacherDashboard = () => {
                             colorScheme="blue"
                             mr={3}
                             onClick={handleEnrollStudent}
-                            isLoading={isLoading}
+                            isLoading={isActionLoading}
                         >
                             Enroll
                         </Button>
                         <Button
                             variant="ghost"
                             onClick={() => setIsStudentModalOpen(false)}
-                            isDisabled={isLoading}
+                            isDisabled={isActionLoading}
                         >
                             Cancel
                         </Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal >
+            </Modal>
 
             {/* Add Lesson Modal */}
-            < Modal isOpen={isLessonModalOpen} onClose={() => setIsLessonModalOpen(false)}>
+            <Modal isOpen={isLessonModalOpen} onClose={() => setIsLessonModalOpen(false)}>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Add New Lesson</ModalHeader>
@@ -653,9 +670,7 @@ const TeacherDashboard = () => {
                                 <FormLabel>Lesson Name</FormLabel>
                                 <Input
                                     value={newLesson.name}
-                                    onChange={(e) =>
-                                        setNewLesson({ ...newLesson, name: e.target.value })
-                                    }
+                                    onChange={(e) => setNewLesson({ ...newLesson, name: e.target.value })}
                                 />
                             </FormControl>
                             <FormControl>
@@ -675,21 +690,21 @@ const TeacherDashboard = () => {
                             colorScheme="blue"
                             mr={3}
                             onClick={handleAddLesson}
-                            isLoading={isLoading}
+                            isLoading={isActionLoading}
                         >
                             Add
                         </Button>
                         <Button
                             variant="ghost"
                             onClick={() => setIsLessonModalOpen(false)}
-                            isDisabled={isLoading}
+                            isDisabled={isActionLoading}
                         >
                             Cancel
                         </Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal >
-        </Box >
+            </Modal>
+        </Box>
     );
 };
 

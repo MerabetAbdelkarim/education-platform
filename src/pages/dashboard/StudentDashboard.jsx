@@ -14,9 +14,10 @@ import {
     useToast,
     Spinner,
     VStack,
+    Skeleton,
+    SkeletonText,
 } from '@chakra-ui/react';
 import { supabase } from '../../supabase';
-
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -26,7 +27,9 @@ const StudentDashboard = () => {
     const [classes, setClasses] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [lessons, setLessons] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isStudentLoading, setIsStudentLoading] = useState(false);
+    const [isClassesLoading, setIsClassesLoading] = useState(false);
+    const [isLessonsLoading, setIsLessonsLoading] = useState(false);
     const toast = useToast();
     const navigate = useNavigate();
 
@@ -40,7 +43,7 @@ const StudentDashboard = () => {
         }
 
         const fetchStudent = async () => {
-            setIsLoading(true);
+            setIsStudentLoading(true);
             const { data: studentData, error } = await supabase
                 .from('students')
                 .select('id, studentId, first_name, last_name')
@@ -55,18 +58,19 @@ const StudentDashboard = () => {
                     duration: 3000,
                     isClosable: true,
                 });
+                setIsStudentLoading(false);
                 return;
             }
             setStudent(studentData);
+            setIsStudentLoading(false);
             await fetchClasses(studentData.id);
-            setIsLoading(false);
         };
 
         fetchStudent();
     }, [user, role, authLoading, navigate, toast]);
 
     const fetchClasses = async (studentId) => {
-        setIsLoading(true);
+        setIsClassesLoading(true);
         const { data, error } = await supabase
             .from('class_enrollments')
             .select(`
@@ -92,11 +96,11 @@ const StudentDashboard = () => {
                 }))
             );
         }
-        setIsLoading(false);
+        setIsClassesLoading(false);
     };
 
     const fetchLessons = async (classId) => {
-        setIsLoading(true);
+        setIsLessonsLoading(true);
         const { data: lessonData, error: lessonError } = await supabase
             .from('lessons')
             .select('id, name, pdf_url, created_at')
@@ -111,7 +115,7 @@ const StudentDashboard = () => {
                 duration: 3000,
                 isClosable: true,
             });
-            setIsLoading(false);
+            setIsLessonsLoading(false);
             return;
         }
 
@@ -130,10 +134,10 @@ const StudentDashboard = () => {
         );
 
         setLessons(lessonsWithUrls);
-        setIsLoading(false);
+        setIsLessonsLoading(false);
     };
 
-    if (authLoading || isLoading || !student) {
+    if (authLoading) {
         return (
             <Flex justify="center" align="center" minH="100vh">
                 <Spinner size="xl" />
@@ -146,92 +150,108 @@ const StudentDashboard = () => {
             <VStack spacing={8} align="stretch">
                 {/* Student Profile */}
                 <Box>
-                    <Flex justify="space-between" align="center">
-                        <Heading size="lg">Student Dashboard</Heading>
-                    </Flex>
-                    <Text mt={2}>
-                        Welcome, {student.first_name} {student.last_name} ({user.email})
-                    </Text>
-                    <Text mt={1}>Student ID: {student.studentId}</Text>
+                    <Skeleton isLoaded={!isStudentLoading} height="40px">
+                        <Flex justify="space-between" align="center">
+                            <Heading size="lg">Student Dashboard</Heading>
+                        </Flex>
+                    </Skeleton>
+                    <SkeletonText isLoaded={!isStudentLoading} mt={2} noOfLines={2} spacing="4">
+                        {student && (
+                            <>
+                                <Text mt={2}>
+                                    Welcome, {student.first_name} {student.last_name} ({user.email})
+                                </Text>
+                                <Text mt={1}>Student ID: {student.studentId}</Text>
+                            </>
+                        )}
+                    </SkeletonText>
                 </Box>
 
                 {/* Enrolled Classes */}
                 <Box>
-                    <Heading size="md" mb={4}>
-                        Your Classes
-                    </Heading>
-                    {classes.length === 0 ? (
-                        <Text>You are not enrolled in any classes.</Text>
-                    ) : (
-                        <Table variant="simple">
-                            <Thead>
-                                <Tr>
-                                    <Th>Name</Th>
-                                    <Th>Description</Th>
-                                    <Th>Teacher</Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {classes.map((cls) => (
-                                    <Tr key={cls.id}>
-                                        <Td>
-                                            <Button
-                                                variant="link"
-                                                onClick={() => {
-                                                    setSelectedClass(cls);
-                                                    fetchLessons(cls.id);
-                                                }}
-                                            >
-                                                {cls.name}
-                                            </Button>
-                                        </Td>
-                                        <Td>{cls.description}</Td>
-                                        <Td>{cls.teacher_name}</Td>
-                                    </Tr>
-                                ))}
-                            </Tbody>
-                        </Table>
-                    )}
-                </Box>
-
-                {/* Lessons for Selected Class */}
-                {selectedClass && (
-                    <Box>
+                    <Skeleton isLoaded={!isClassesLoading} height="40px">
                         <Heading size="md" mb={4}>
-                            Lessons for {selectedClass.name}
+                            Your Classes
                         </Heading>
-                        {lessons.length === 0 ? (
-                            <Text>No lessons available for this class.</Text>
+                    </Skeleton>
+                    <Skeleton isLoaded={!isClassesLoading} height="200px">
+                        {classes.length === 0 ? (
+                            <Text>You are not enrolled in any classes.</Text>
                         ) : (
                             <Table variant="simple">
                                 <Thead>
                                     <Tr>
                                         <Th>Name</Th>
-                                        <Th>PDF</Th>
+                                        <Th>Description</Th>
+                                        <Th>Teacher</Th>
                                     </Tr>
                                 </Thead>
                                 <Tbody>
-                                    {lessons.map((lesson) => (
-                                        <Tr key={lesson.id}>
-                                            <Td>{lesson.name}</Td>
+                                    {classes.map((cls) => (
+                                        <Tr key={cls.id}>
                                             <Td>
-                                                {lesson.pdf_url ? (
-                                                    <a
-                                                        href={lesson.pdf_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                    >
-                                                        View PDF
-                                                    </a>
-                                                ) : (
-                                                    <Text color="red.500">PDF unavailable</Text>
-                                                )}
+                                                <Button
+                                                    variant="link"
+                                                    onClick={() => {
+                                                        setSelectedClass(cls);
+                                                        fetchLessons(cls.id);
+                                                    }}
+                                                >
+                                                    {cls.name}
+                                                </Button>
                                             </Td>
+                                            <Td>{cls.description}</Td>
+                                            <Td>{cls.teacher_name}</Td>
                                         </Tr>
                                     ))}
                                 </Tbody>
                             </Table>
                         )}
+                    </Skeleton>
+                </Box>
+
+                {/* Lessons for Selected Class */}
+                {selectedClass && (
+                    <Box>
+                        <Skeleton isLoaded={!isLessonsLoading} height="40px">
+                            <Heading size="md" mb={4}>
+                                Lessons for {selectedClass.name}
+                            </Heading>
+                        </Skeleton>
+                        <Skeleton isLoaded={!isLessonsLoading} height="200px">
+                            {lessons.length === 0 ? (
+                                <Text>No lessons available for this class.</Text>
+                            ) : (
+                                <Table variant="simple">
+                                    <Thead>
+                                        <Tr>
+                                            <Th>Name</Th>
+                                            <Th>PDF</Th>
+                                        </Tr>
+                                    </Thead>
+                                    <Tbody>
+                                        {lessons.map((lesson) => (
+                                            <Tr key={lesson.id}>
+                                                <Td>{lesson.name}</Td>
+                                                <Td>
+                                                    {lesson.pdf_url ? (
+                                                        <a
+                                                            href={lesson.pdf_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            View PDF
+                                                        </a>
+                                                    ) : (
+                                                        <Text color="red.500">PDF unavailable</Text>
+                                                    )}
+                                                </Td>
+                                            </Tr>
+                                        ))}
+                                    </Tbody>
+                                </Table>
+                            )}
+                        </Skeleton>
                     </Box>
                 )}
             </VStack>
